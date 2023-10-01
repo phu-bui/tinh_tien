@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chia Tiền Đi Chơi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #333; /* Màu nền màu tối */
+            color: #fff; /* Màu chữ trắng */
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #444; /* Màu nền container */
+        }
+        input[type="text"],
+        input[type="number"] {
+          width: 95%;
+        }
+        input[type="text"],
+        input[type="number"],
+        button {
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            background-color: #FF6B6B; /* Màu nền nút tính toán */
+            color: #fff; /* Màu chữ nút tính toán */
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Chia Tiền Đi Chơi</h2>
+        <form id="expense-form">
+          <div class="center-input">
+            <label for="name">Tên Thành Viên:</label>
+            <input type="text" id="name" required>
+        </div>
+        <div class="center-input">
+            <label for="amount">Số Tiền Đã Trả:</label>
+            <input type="number" id="amount" min="0" required>
+        </div>
+            <button type="button" onclick="addExpense()">Thêm Thành Viên</button>
+        </form>
+        <h3>Danh Sách Thành Viên:</h3>
+        <ul id="expense-list"></ul>
+        <button type="button" id="calculate-button" onclick="calculateShare()">Tính Toán</button>
+        <h3>Chi Tiết Kết Quả:</h3>
+        <table id="result-table">
+            <thead>
+                <tr>
+                    <th>Thành Viên</th>
+                    <th>Cần Trả Cho</th>
+                    <th>Số Tiền</th>
+                </tr>
+            </thead>
+            <tbody id="result-body"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const expenses = [];
+
+        function addExpense() {
+            const name = document.getElementById('name').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            if (name && !isNaN(amount) && amount >= 0) {
+                expenses.push({ name, amount });
+                updateExpenseList();
+                document.getElementById('name').value = '';
+                document.getElementById('amount').value = '';
+            }
+        }
+
+        function updateExpenseList() {
+            const expenseList = document.getElementById('expense-list');
+            expenseList.innerHTML = '';
+
+            expenses.forEach((expense) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${expense.name}: $${expense.amount.toFixed(2)}`;
+                expenseList.appendChild(listItem);
+            });
+        }
+
+        function calculateShare() {
+          const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+          const averageAmount = totalAmount / expenses.length;
+
+          const resultBody = document.getElementById('result-body');
+          resultBody.innerHTML = '';
+
+          expenses.forEach((payer) => {
+              if (payer.amount < averageAmount) {
+                  expenses.forEach((payee) => {
+                      if (payer !== payee && payee.amount > averageAmount) {
+                          const shareAmount = (averageAmount - payer.amount).toFixed(2);
+                          const shareRow = document.createElement('tr');
+                          shareRow.innerHTML = `<td>${payer.name}</td><td>${payee.name}</td><td>$${shareAmount}</td>`;
+                          resultBody.appendChild(shareRow);
+                      }
+                  });
+              }
+          });
+        }
+
+        document.getElementById('expense-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            addExpense();
+        });
+
+        document.getElementById('calculate-button').addEventListener('click', calculateShare);
+    </script>
+</body>
+</html>
